@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #000;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            margin: 0;
+        }
+
+        .phone-frame {
+            width: 100%;
+            max-width: 100%;
+            height: 100vh;
+            background: #000;
+            padding: 0;
+            box-shadow: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .player-container {
+            background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+            height: 100%;
+            padding: 20px;
+            padding-bottom: 140px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        /* Now Playing Page */
+        .now-playing-page {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            padding: 20px;
+            padding-bottom: 140px;
+        }
+
+        .now-playing-page.active {
+            display: flex;
+        }
+
+        .now-playing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            width: 24px;
+        }
+
+        .now-playing-title {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            flex: 1;
+            text-align: center;
+        }
+
+        .menu-spacer {
+            width: 24px;
+        }
+
+        .album-art-large {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .album-art-large img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 15px;
+        }
+
+        .song-info-large {
+            text-align: center;
+            margin: 30px 0 20px 0;
+        }
+
+        .song-title-large {
+            color: #fff;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .artist-name-large {
+            color: #888;
+            font-size: 16px;
+        }
+
+        .progress-section {
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #2a2a2a;
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #fff;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            padding: 10px;
+            font-size: 24px;
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .play-btn {
+            width: 70px;
+            height: 70px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .play-btn i {
+            color: #000;
+            font-size: 28px;
+        }
+
+        .volume-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .volume-icon {
+            color: #fff;
+            font-size: 18px;
+        }
+
+        .volume-bar {
+            flex: 1;
+            height: 4px;
+            background: #2a2a2a;
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .volume-fill {
+            height: 100%;
+            background: #fff;
+            border-radius: 2px;
+            width: 70%;
+        }
+
+        /* Mini Player */
+        .mini-player {
+            position: fixed;
+            bottom: 60px;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            border-top: 1px solid #2a2a2a;
+            padding: 10px 20px;
+            display: none;
+            align-items: center;
+            gap: 15px;
+            z-index: 999;
+            cursor: pointer;
+        }
+
+        .mini-player.show {
+            display: flex;
+        }
+
+        .mini-player-image {
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            object-fit: cover;
+            display: block;
+            flex-shrink: 0;
+        }
+
+        .mini-player-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .mini-player-title {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .mini-player-artist {
+            color: #888;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .mini-player-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .mini-play-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #000;
+            border-top: 1px solid #2a2a2a;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.3s;
+            padding: 5px 15px;
+        }
+
+        .nav-item.active {
+            color: #fff;
+        }
+
+        .nav-item i {
+            font-size: 20px;
+        }
+
+        .nav-item span {
+            font-size: 10px;
+        }
+
+        .page-content {
+            display: none;
+        }
+
+        .page-content.active {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        .page-header {
+            color: #fff;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+
+        .albums-scroll {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            overflow-y: visible;
+            padding: 5px;
+            padding-bottom: 200px;
+            margin-bottom: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .albums-scroll::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .albums-scroll::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 2px;
+        }
+
+        .albums-scroll::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 2px;
+        }
+
+        .album-card {
+            min-width: 150px;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: transform 0.3s;
+
+        }
+
+        .album-card:hover {
+            transform: scale(1.05);
+        }
+
+        .album-cover {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .album-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .album-title {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+
+        .album-artist {
+            color: #888;
+            font-size: 11px;
+        }
+
+        .trending-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .trending-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .trending-item:hover {
+            background: #2a2a2a;
+        }
+
+        .trending-number {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+            min-width: 25px;
+        }
+
+        .trending-cover {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .trending-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .trending-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .trending-title {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+
+        .trending-artist {
+            color: #888;
+            font-size: 12px;
+        }
+
+        .trending-plays {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .favorite-card {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .favorite-card:hover {
+            background: #2a2a2a;
+        }
+
+        .favorite-card-image {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .favorite-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .favorite-card-title {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .favorite-card-artist {
+            color: #888;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: #666;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .search-results {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .playlist-item {
+            padding: 12px;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .playlist-item:hover {
+            background: #2a2a2a;
+        }
+
+        .playlist-item-image {
+            width: 45px;
+            height: 45px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .playlist-item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .playlist-item-info {
+            flex: 1;
+        }
+
+        .playlist-item-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .playlist-item-artist {
+            font-size: 12px;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .profile-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-avatar i {
+            font-size: 40px;
+            color: #fff;
+        }
+
+        .profile-name {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .profile-email {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .settings-list {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .setting-item {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .setting-item:hover {
+            background: #2a2a2a;
+        }
+
+        .setting-item-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .setting-item i {
+            color: #fff;
+            font-size: 18px;
+            width: 20px;
+        }
+
+        .setting-item-text {
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .setting-item-right i {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <!-- Now Playing Page (Full Player) -->
+        <div class="now-playing-page" id="nowPlayingPage">
+            <div class="now-playing-header">
+                <button class="back-btn" onclick="closeNowPlaying()">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="now-playing-title">Now Playing</div>
+                <div class="menu-spacer"></div>
+            </div>
+
+            <div class="album-art-large">
+                <img id="albumArtLarge" src="https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=400&fit=crop" alt="Album Art">
+            </div>
+
+            <div class="song-info-large">
+                <div class="song-title-large" id="songTitleLarge">Night Drive</div>
+                <div class="artist-name-large" id="artistNameLarge">Midnight Echoes</div>
+            </div>
+
+            <div class="progress-section">
+                <div class="progress-bar" onclick="seek(event)">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="time-info">
+                    <span id="currentTime">0:00</span>
+                    <span id="duration">3:45</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" onclick="previousSong()">
+                    <i class="fas fa-backward"></i>
+                </button>
+                <button class="play-btn" onclick="togglePlay()">
+                    <i class="fas fa-play" id="playIcon"></i>
+                </button>
+                <button class="control-btn" onclick="nextSong()">
+                    <i class="fas fa-forward"></i>
+                </button>
+            </div>
+
+            <div class="volume-section">
+                <i class="fas fa-volume-down volume-icon"></i>
+                <div class="volume-bar" onclick="adjustVolume(event)">
+                    <div class="volume-fill" id="volumeFill"></div>
+                </div>
+                <i class="fas fa-volume-up volume-icon"></i>
+            </div>
+        </div>
+
+        <div class="player-container">
+            <!-- Home Page -->
+            <div class="page-content active" id="homePage">
+                <h1 class="page-header">Discover</h1>
+                
+                <h2 class="section-header">Recent Albums</h2>
+                <div class="albums-scroll">
+                    <div class="album-card" onclick="selectSong(0)">
+                        <div class="album-cover">
+                            <img src="https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=140&h=140&fit=crop" alt="Album">
+                        </div>
+                        <div class="album-title">Night Drive</div>
+                        <div class="album-artist">Midnight Echoes</div>
+                    </div>
+                    <div class="album-card" onclick="selectSong(1)">
+                        <div class="album-cover">
+                            <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=140&h=140&fit=crop" alt="Album">
+                        </div>
+                        <div class="album-title">Urban Dreams</div>
+                        <div class="album-artist">City Lights</div>
+                    </div>
+                    <div class="album-card" onclick="selectSong(2)">
+                        <div class="album-cover">
+                            <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=140&h=140&fit=crop" alt="Album">
+                        </div>
+                        <div class="album-title">Monochrome</div>
+                        <div class="album-artist">Grey Scale</div>
+                    </div>
+                    <div class="album-card" onclick="selectSong(3)">
+                        <div class="album-cover">
+                            <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=140&h=140&fit=crop" alt="Album">
+                        </div>
+                        <div class="album-title">Shadow Dance</div>
+                        <div class="album-artist">Dark Waves</div>
+                    </div>
+                </div>
+
+                <h2 class="section-header">Trending Now</h2>
+                <div class="trending-list">
+                    <div class="trending-item" onclick="selectSong(0)">
+                        <div class="trending-number">1</div>
+                        <div class="trending-cover">
+                            <img src="https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=50&h=50&fit=crop" alt="Song">
+                        </div>
+                        <div class="trending-info">
+                            <div class="trending-title">Night Drive</div>
+                            <div class="trending-artist">Midnight Echoes</div>
+                        </div>
+                        <div class="trending-plays">2.5M</div>
+                    </div>
+                    <div class="trending-item" onclick="selectSong(1)">
+                        <div class="trending-number">2</div>
+                        <div class="trending-cover">
+                            <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=50&h=50&fit=crop" alt="Song">
+                        </div>
+                        <div class="trending-info">
+                            <div class="trending-title">Urban Dreams</div>
+                            <div class="trending-artist">City Lights</div>
+                        </div>
+                        <div class="trending-plays">1.8M</div>
+                    </div>
+                    <div class="trending-item" onclick="selectSong(2)">
+                        <div class="trending-number">3</div>
+                        <div class="trending-cover">
+                            <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=50&h=50&fit=crop" alt="Song">
+                        </div>
+                        <div class="trending-info">
+                            <div class="trending-title">Monochrome</div>
+                            <div class="trending-artist">Grey Scale</div>
+                        </div>
+                        <div class="trending-plays">1.5M</div>
+                    </div>
+                    <div class="trending-item" onclick="selectSong(3)">
+                        <div class="trending-number">4</div>
+                        <div class="trending-cover">
+                            <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=50&h=50&fit=crop" alt="Song">
+                        </div>
+                        <div class="trending-info">
+                            <div class="trending-title">Shadow Dance</div>
+                            <div class="trending-artist">Dark Waves</div>
+                        </div>
+                        <div class="trending-plays">1.2M</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Favorites Page -->
+            <div class="page-content" id="favoritesPage">
+                <h1 class="page-header">My Favorites</h1>
+                <div class="favorites-grid">
+                    <div class="favorite-card" onclick="selectSong(0)">
+                        <div class="favorite-card-image">
+                            <img src="https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=200&h=200&fit=crop" alt="Song">
+                        </div>
+                        <div class="favorite-card-title">Night Drive</div>
+                        <div class="favorite-card-artist">Midnight Echoes</div>
+                    </div>
+                    <div class="favorite-card" onclick="selectSong(1)">
+                        <div class="favorite-card-image">
+                            <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop" alt="Song">
+                        </div>
+                        <div class="favorite-card-title">Urban Dreams</div>
+                        <div class="favorite-card-artist">City Lights</div>
+                    </div>
+                    <div class="favorite-card" onclick="selectSong(2)">
+                        <div class="favorite-card-image">
+                            <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=200&h=200&fit=crop" alt="Song">
+                        </div>
+                        <div class="favorite-card-title">Monochrome</div>
+                        <div class="favorite-card-artist">Grey Scale</div>
+                    </div>
+                    <div class="favorite-card" onclick="selectSong(3)">
+                        <div class="favorite-card-image">
+                            <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=200&h=200&fit=crop" alt="Song">
+                        </div>
+                        <div class="favorite-card-title">Shadow Dance</div>
+                        <div class="favorite-card-artist">Dark Waves</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Page -->
+            <div class="page-content" id="searchPage">
+                <h1 class="page-header">Search</h1>
+                <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Search for songs, artists..." id="searchInput" oninput="performSearch()">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <div class="search-results" id="searchResults">
+                    <div class="playlist-item" onclick="selectSong(0)">
+                        <div class="playlist-item-image">
+                            <img src="https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=45&h=45&fit=crop" alt="Song">
+                        </div>
+                        <div class="playlist-item-info">
+                            <div class="playlist-item-title">Night Drive</div>
+                            <div class="playlist-item-artist">Midnight Echoes</div>
+                        </div>
+                    </div>
+                    <div class="playlist-item" onclick="selectSong(1)">
+                        <div class="playlist-item-image">
+                            <img src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=45&h=45&fit=crop" alt="Song">
+                        </div>
+                        <div class="playlist-item-info">
+                            <div class="playlist-item-title">Urban Dreams</div>
+                            <div class="playlist-item-artist">City Lights</div>
+                        </div>
+                    </div>
+                    <div class="playlist-item" onclick="selectSong(2)">
+                        <div class="playlist-item-image">
+                            <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=45&h=45&fit=crop" alt="Song">
+                        </div>
+                        <div class="playlist-item-info">
+                            <div class="playlist-item-title">Monochrome</div>
+                            <div class="playlist-item-artist">Grey Scale</div>
+                        </div>
+                    </div>
+                    <div class="playlist-item" onclick="selectSong(3)">
+                        <div class="playlist-item-image">
+                            <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=45&h=45&fit=crop" alt="Song">
+                        </div>
+                        <div class="playlist-item-info">
+                            <div class="playlist-item-title">Shadow Dance</div>
+                            <div class="playlist-item-artist">Dark Waves</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Page -->
+            <div class="page-content" id="accountPage">
+                <h1 class="page-header">Account</h1>
+                <div class="profile-section">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="profile-name">Music Lover</div>
+                    <div class="profile-email">user@musicapp.com</div>
+                </div>
+                <div class="settings-list">
+                    <div class="setting-item">
+                        <div class="setting-item-left">
+                            <i class="fas fa-bell"></i>
+                            <span class="setting-item-text">Notifications</span>
+                        </div>
+                        <div class="setting-item-right">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-item-left">
+                            <i class="fas fa-cog"></i>
+                            <span class="setting-item-text">Settings</span>
+                        </div>
+                        <div class="setting-item-right">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mini Player -->
+        <div class="mini-player" id="miniPlayer" onclick="openNowPlaying()">
+            <img class="mini-player-image" id="miniPlayerImage" src="https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=45&h=45&fit=crop" alt="Song">
+            <div class="mini-player-info">
+                <div class="mini-player-title" id="miniPlayerTitle">Night Drive</div>
+                <div class="mini-player-artist" id="miniPlayerArtist">Midnight Echoes</div>
+            </div>
+            <div class="mini-player-controls">
+                <button class="mini-play-btn" onclick="event.stopPropagation(); togglePlay()">
+                    <i class="fas fa-play" id="miniPlayIcon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <button class="nav-item active" onclick="switchPage('home')">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" onclick="switchPage('favorites')">
+                <i class="fas fa-heart"></i>
+                <span>Favorites</span>
+            </button>
+            <button class="nav-item" onclick="switchPage('search')">
+                <i class="fas fa-search"></i>
+                <span>Search</span>
+            </button>
+            <button class="nav-item" onclick="switchPage('account')">
+                <i class="fas fa-user"></i>
+                <span>Account</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Hidden Audio Element -->
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        const songs = [
+            {
+                title: "Night Drive",
+                artist: "Midnight Echoes",
+                duration: 225,
+                image: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=400&fit=crop",
+                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+            },
+            {
+                title: "Urban Dreams",
+                artist: "City Lights",
+                duration: 198,
+                image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop",
+                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+            },
+            {
+                title: "Monochrome",
+                artist: "Grey Scale",
+                duration: 243,
+                image: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=400&fit=crop",
+                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+            },
+            {
+                title: "Shadow Dance",
+                artist: "Dark Waves",
+                duration: 210,
+                image: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=400&fit=crop",
+                audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
+            }
+        ];
+
+        let currentSong = 0;
+        let isPlaying = false;
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        audioPlayer.addEventListener('timeupdate', updateProgress);
+        audioPlayer.addEventListener('ended', nextSong);
+        audioPlayer.addEventListener('loadedmetadata', function() {
+            const duration = Math.floor(audioPlayer.duration);
+            document.getElementById('duration').textContent = formatTime(duration);
+        });
+
+        function togglePlay() {
+            if (isPlaying) {
+                audioPlayer.pause();
+                isPlaying = false;
+                document.getElementById('playIcon').className = 'fas fa-play';
+                document.getElementById('miniPlayIcon').className = 'fas fa-play';
+            } else {
+                audioPlayer.play();
+                isPlaying = true;
+                document.getElementById('playIcon').className = 'fas fa-pause';
+                document.getElementById('miniPlayIcon').className = 'fas fa-pause';
+            }
+        }
+
+        function updateProgress() {
+            const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('currentTime').textContent = formatTime(Math.floor(audioPlayer.currentTime));
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function seek(e) {
+            const bar = e.currentTarget;
+            const rect = bar.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            audioPlayer.currentTime = percent * audioPlayer.duration;
+        }
+
+        function adjustVolume(e) {
+            const bar = e.currentTarget;
+            const rect = bar.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            audioPlayer.volume = percent;
+            document.getElementById('volumeFill').style.width = (percent * 100) + '%';
+        }
+
+        function nextSong() {
+            currentSong = (currentSong + 1) % songs.length;
+            loadSong();
+            if (isPlaying) {
+                audioPlayer.play();
+            }
+        }
+
+        function previousSong() {
+            currentSong = (currentSong - 1 + songs.length) % songs.length;
+            loadSong();
+            if (isPlaying) {
+                audioPlayer.play();
+            }
+        }
+
+        function selectSong(index) {
+            currentSong = index;
+            loadSong();
+            audioPlayer.play();
+            isPlaying = true;
+            document.getElementById('playIcon').className = 'fas fa-pause';
+            document.getElementById('miniPlayIcon').className = 'fas fa-pause';
+            document.getElementById('miniPlayer').classList.add('show');
+            openNowPlaying();
+        }
+
+        function loadSong() {
+            const song = songs[currentSong];
+            audioPlayer.src = song.audioUrl;
+            document.getElementById('songTitleLarge').textContent = song.title;
+            document.getElementById('artistNameLarge').textContent = song.artist;
+            document.getElementById('albumArtLarge').src = song.image;
+            document.getElementById('miniPlayerTitle').textContent = song.title;
+            document.getElementById('miniPlayerArtist').textContent = song.artist;
+            document.getElementById('miniPlayerImage').src = song.image;
+        }
+
+        function openNowPlaying() {
+            document.getElementById('nowPlayingPage').classList.add('active');
+            document.querySelector('.player-container').style.display = 'none';
+        }
+
+        function closeNowPlaying() {
+            document.getElementById('nowPlayingPage').classList.remove('active');
+            document.querySelector('.player-container').style.display = 'flex';
+        }
+
+        function switchPage(page) {
+            if (document.getElementById('nowPlayingPage').classList.contains('active')) {
+                closeNowPlaying();
+            }
+            document.querySelectorAll('.page-content').forEach(p => {
+                p.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            if (page === 'home') {
+                document.getElementById('homePage').classList.add('active');
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
+            } else if (page === 'favorites') {
+                document.getElementById('favoritesPage').classList.add('active');
+                document.querySelectorAll('.nav-item')[1].classList.add('active');
+            } else if (page === 'search') {
+                document.getElementById('searchPage').classList.add('active');
+                document.querySelectorAll('.nav-item')[2].classList.add('active');
+            } else if (page === 'account') {
+                document.getElementById('accountPage').classList.add('active');
+                document.querySelectorAll('.nav-item')[3].classList.add('active');
+            }
+        }
+
+        function performSearch() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const resultsContainer = document.getElementById('searchResults');
+            const items = resultsContainer.querySelectorAll('.playlist-item');
+            items.forEach((item, index) => {
+                const title = songs[index].title.toLowerCase();
+                const artist = songs[index].artist.toLowerCase();
+                if (title.includes(searchTerm) || artist.includes(searchTerm)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        loadSong();
+    </script>
+</body>
+</html>
